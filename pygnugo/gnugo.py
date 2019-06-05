@@ -1,6 +1,6 @@
 from subprocess import Popen, PIPE, STDOUT
 from queue import Queue
-from threading import Thread
+from threading import Thread, Event
 import time
 
 from enum import Enum
@@ -68,19 +68,33 @@ class GnuGo(object):
                 '--boardsize', '{0}'.format(self._boardsize.value)]
         self._gnugo = Popen(cmd,
                 stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+
+        self._stop_event = Event()
         self._readoutputthread = Thread(
                 target=self._fillQ,
-                args=[self._gnugo.stdout, self._outputQ])
+                args=[self._gnugo.stdout, self._outputQ, self._stop_event])
         self._readoutputthread.daemon = True
         self._readoutputthread.start()
 
 
-    def _fillQ(self, output, Q):
+    def quit(self):
+        self._send('quit')
+        self._stop_event.set()
+        self._gnugo.terminate()
+        self._gnugo.wait()
+        self._gnugo = None
+        self._readoutputthread.join()
+        self._readoutputthread = None
+
+
+    def _fillQ(self, output, Q, stop_event):
         """
         Callback function used by thread.
         """
 
         for line in iter(output.readline, ''):
+            if stop_event.is_set():
+                break
             Q.put(line)
         output.close()
 
@@ -258,7 +272,6 @@ class GnuGo(object):
     protocol_version            = GenerateGnuGoCmd('protocol_version', returntype=int)
     query_boardsize             = GenerateGnuGoCmd('query_boardsize', returntype=Boardsize)
     query_orientation           = no_impl
-    quit                        = GenerateGnuGoCmd('quit')
     reg_genmove                 = no_impl
     report_uncertainty          = no_impl
     reset_connection_node_counter = no_impl
