@@ -138,7 +138,9 @@ class GnuGo(object):
                 return None
             else:
                 ret_val = _output.split('=')[1]
-                if returntype != str:
+                if returntype == str:
+                    ret_val = '\n'.join(list(filter(str.strip, ret_val.splitlines())))
+                else:
                     ret_val = ret_val.strip()
                 return returntype(ret_val)
 
