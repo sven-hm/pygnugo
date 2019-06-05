@@ -39,5 +39,14 @@ class TestPyGnuGo(unittest.TestCase):
 
         gg.quit()
 
+    def test_c_load_from_file(self):
+        gg = pygnugo.GnuGo()
+        gg.loadsgf('tests/example2.sgf')
+        print(gg.showboard())
+        gg.genmove(pygnugo.Color.BLACK)
+        gg.genmove(pygnugo.Color.WHITE)
+        print(gg.showboard())
+        print(gg.move_history())
+
 if __name__ == '__main__':
     unittest.main()

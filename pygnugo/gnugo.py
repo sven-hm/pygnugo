@@ -17,6 +17,9 @@ class Color(Enum):
     def __str__(self):
         return self.name.lower()
 
+    def other(self):
+        return Color((self.value + 1) % 2)
+
 
 class Boardsize(Enum):
     """
@@ -55,9 +58,8 @@ class GnuGoNotImplemented(Exception):
 
 class GnuGo(object):
 
-    def __init__(self, color=Color.BLACK, boardsize=Boardsize.LARGE):
+    def __init__(self, boardsize=Boardsize.LARGE):
 
-        self._color = color
         self._boardsize = boardsize
 
         self._outputQ = Queue()
@@ -124,7 +126,6 @@ class GnuGo(object):
             self._send(_cmd)
 
             # wait for response
-            # TODO: timeout
             while True:
                 time.sleep(delay)
                 _output = self.get_output()
@@ -133,8 +134,13 @@ class GnuGo(object):
                 elif _output.find('?') != -1:
                     raise GnuGoException(_output.split('?')[1].strip())
 
-            return None if returntype is None else \
-                    returntype(_output.split('=')[1].strip())
+            if returntype is None:
+                return None
+            else:
+                ret_val = _output.split('=')[1]
+                if returntype != str:
+                    ret_val = ret_val.strip()
+                return returntype(ret_val)
 
         method.__name__ = name
         return method
@@ -226,7 +232,7 @@ class GnuGo(object):
     limit_search                = no_impl
     list_commands               = no_impl
     list_stones                 = no_impl
-    loadsgf                     = no_impl
+    loadsgf                     = GenerateGnuGoCmd('loadsgf', argtypes=[str], returntype=str)
     move_influence              = no_impl
     move_probabilities          = no_impl
     move_reasons                = no_impl
