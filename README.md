@@ -10,7 +10,8 @@ Library to communicate with gnugo via gtp.
 ## Install
 
 ```sh
-pip install pygnugo
+git clone https://github.com/sven-hm/pygnugo.git
+pip install ./pygnugo
 ```
 
 ## Usage
@@ -30,7 +31,7 @@ In [5]: for i in range(10):
    ...:
 
 In [6]: print(gnugo.showboard())
-A B C D E F G H J K L M N O P Q R S T
+   A B C D E F G H J K L M N O P Q R S T
 19 . . . . . . . . . . . . . . . . . . . 19
 18 . . . . . . . . . . . . . . . . . . . 18
 17 . . . . . . . . . . . . . . . . O X . 17
