@@ -2,7 +2,7 @@ import unittest
 import sys, os
 
 test_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(test_path + '/../pygnugo')
+sys.path.append(test_path + '/..')
 
 import pygnugo
 
@@ -41,7 +41,7 @@ class TestPyGnuGo(unittest.TestCase):
 
     def test_c_load_from_file(self):
         gg = pygnugo.GnuGo()
-        gg.loadsgf('tests/example2.sgf')
+        gg.loadsgf('tests/example.sgf')
         print(gg.showboard())
         gg.genmove(pygnugo.Color.BLACK)
         gg.genmove(pygnugo.Color.WHITE)
