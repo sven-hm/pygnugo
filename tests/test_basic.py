@@ -39,14 +39,30 @@ class TestPyGnuGo(unittest.TestCase):
 
         gg.quit()
 
-    def test_c_load_from_file(self):
+    def test_c_write_load_file(self):
+        _tmp_filename = 'tests/tmp.sgf'
         gg = pygnugo.GnuGo()
-        gg.loadsgf('tests/example.sgf')
-        print(gg.showboard())
+
+        gg.play(pygnugo.Color.BLACK, pygnugo.Vertex('D4'))
+        gg.genmove(pygnugo.Color.WHITE)
         gg.genmove(pygnugo.Color.BLACK)
         gg.genmove(pygnugo.Color.WHITE)
-        print(gg.showboard())
-        print(gg.move_history())
+        gg.genmove(pygnugo.Color.BLACK)
+        gg.genmove(pygnugo.Color.WHITE)
+        gg.genmove(pygnugo.Color.BLACK)
+
+        history = gg.move_history()
+
+        gg.save_with_history(_tmp_filename)
+        gg.quit()
+
+        gg2 = pygnugo.GnuGo()
+        gg2.loadsgf(_tmp_filename)
+
+        self.assertEqual(history, gg2.move_history())
+
+        gg2.quit()
+        os.remove(_tmp_filename)
 
 if __name__ == '__main__':
     unittest.main()
