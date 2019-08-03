@@ -91,7 +91,7 @@ class GnuGo(object):
         self._readoutputthread = None
 
 
-    def save_with_history(self, filename):
+    def save_with_history(self, filename, game_information=None):
         """
         Save game to sgf file. Including basic history.
         If you don't need the history, use printsgf instead.
@@ -108,11 +108,17 @@ class GnuGo(object):
                     + _sgf_alphabet[self._boardsize.value - int(move[1][1:])] \
                     + ']\n'
 
+        _game_informatios_str = '\n'
+        if game_information is not None and type(game_information) == dict:
+            for k in game_information.keys():
+                _game_informatios_str += k + '[' + game_information[k] + ']\n'
+
         # get sgf file from gnugo
         _sgf = self.printsgf('')
         # remove static stone positions, substitute history
         _sgf = re.sub('AW(\[[a-z]{2}\]\n*){1,}', '', _sgf)
-        _sgf = re.sub('AB(\[[a-z]{2}\]\n*){1,}', _history, _sgf)
+        _sgf = re.sub('AB(\[[a-z]{2}\]\n*){1,}',
+                _game_informatios_str + _history, _sgf)
 
         with open(filename, 'w') as _f:
             _f.write(_sgf)

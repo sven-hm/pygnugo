@@ -53,7 +53,11 @@ class TestPyGnuGo(unittest.TestCase):
 
         history = gg.move_history()
 
-        gg.save_with_history(_tmp_filename)
+        gg.save_with_history(_tmp_filename,
+                game_information={
+                    'PB': 'gnugo',
+                    'PW': 'ich',
+                    })
         gg.quit()
 
         gg2 = pygnugo.GnuGo()
