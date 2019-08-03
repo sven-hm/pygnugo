@@ -82,6 +82,8 @@ class GnuGo(object):
         self._stop_event.set()
         self._gnugo.terminate()
         self._gnugo.wait()
+        self._gnugo.stdin.close()
+        self._gnugo.stdout.close()
         self._gnugo = None
         self._readoutputthread.join()
         self._readoutputthread = None
