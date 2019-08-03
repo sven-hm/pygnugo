@@ -2,6 +2,7 @@ from subprocess import Popen, PIPE, STDOUT
 from queue import Queue
 from threading import Thread, Event
 import time
+import re
 
 from enum import Enum
 
@@ -78,6 +79,7 @@ class GnuGo(object):
 
 
     def quit(self):
+
         self._send('quit')
         self._stop_event.set()
         self._gnugo.terminate()
@@ -87,6 +89,33 @@ class GnuGo(object):
         self._gnugo = None
         self._readoutputthread.join()
         self._readoutputthread = None
+
+
+    def save_with_history(self, filename):
+        """
+        Save game to sgf file. Including basic history.
+        If you don't need the history, use printsgf instead.
+        """
+
+        # prepare history
+        _sgf_alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        _history = '\n'
+        for line in reversed(self.move_history().split('\n')):
+            move = line.strip().split(' ')
+            _p = 'ABCDEFGHJKLMNOPQRST'.find(move[1][0])
+            _history += ';' + ('B' if move[0] == 'black' else 'W') \
+                    + '[' + _sgf_alphabet[_p] \
+                    + _sgf_alphabet[self._boardsize.value - int(move[1][1:])] \
+                    + ']\n'
+
+        # get sgf file from gnugo
+        _sgf = self.printsgf('')
+        # remove static stone positions, substitute history
+        _sgf = re.sub('AW(\[[a-z]{2}\]\n*){1,}', '', _sgf)
+        _sgf = re.sub('AB(\[[a-z]{2}\]\n*){1,}', _history, _sgf)
+
+        with open(filename, 'w') as _f:
+            _f.write(_sgf)
 
 
     def _fillQ(self, output, Q, stop_event):
@@ -102,6 +131,7 @@ class GnuGo(object):
 
 
     def _send(self, cmd):
+
         if self._gnugo is None:
             return
 
@@ -110,6 +140,7 @@ class GnuGo(object):
 
 
     def get_output(self):
+
         if self._gnugo is None:
             raise NoGameRunningError("No game running.")
 
@@ -164,6 +195,7 @@ class GnuGo(object):
         return method
 
     def no_impl(self):
+
         raise GnuGoNotImplemented('Function not mapped yet.')
 
     """
@@ -270,7 +302,7 @@ class GnuGo(object):
     place_free_handicap         = no_impl
     play                        = GenerateGnuGoCmd('play', argtypes=[Color, Vertex])
     popgo                       = no_impl
-    printsgf                    = no_impl
+    printsgf                    = GenerateGnuGoCmd('printsgf', argtypes=[str], returntype=str)
     protocol_version            = GenerateGnuGoCmd('protocol_version', returntype=int)
     query_boardsize             = GenerateGnuGoCmd('query_boardsize', returntype=Boardsize)
     query_orientation           = no_impl
