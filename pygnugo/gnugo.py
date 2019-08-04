@@ -109,7 +109,7 @@ class GnuGo(object):
                     + ']\n'
 
         _game_informatios_str = '\n'
-        if game_information is not None and type(game_information) == dict:
+        if type(game_information) == dict:
             for k in game_information.keys():
                 _game_informatios_str += k + '[' + game_information[k] + ']\n'
 
@@ -122,6 +122,25 @@ class GnuGo(object):
 
         with open(filename, 'w') as _f:
             _f.write(_sgf)
+
+
+    def read_sgf_info(self, filename, keys=[]):
+        """
+        Read info from sgf file.
+        """
+
+        return_dict = {}
+        with open(filename, 'r') as _f:
+            _sgf = _f.read()
+
+            for k in keys:
+                return_dict[k] = []
+                _r = re.search(k + '(\[[\w]+\]\n*){1,}', _sgf)
+                if _r:
+                    return_dict[k] = [
+                            x.replace(']', '').replace('\n', '')
+                            for x in _r.group(0).split('[')][1:]
+        return return_dict
 
 
     def _fillQ(self, output, Q, stop_event):

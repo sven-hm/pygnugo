@@ -66,6 +66,17 @@ class TestPyGnuGo(unittest.TestCase):
         self.assertEqual(history, gg2.move_history())
 
         gg2.quit()
+
+    def test_d_read_info_from_file(self):
+        _tmp_filename = 'tests/tmp.sgf'
+
+        gg = pygnugo.GnuGo()
+        _info = gg.read_sgf_info(_tmp_filename, ['SZ', 'FF', 'GM'])
+
+        self.assertEqual(['19'], _info['SZ'])
+        self.assertEqual(['1'], _info['GM'])
+        self.assertEqual(['4'], _info['FF'])
+
         os.remove(_tmp_filename)
 
 if __name__ == '__main__':
